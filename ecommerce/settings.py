@@ -1,14 +1,16 @@
 import os
 from pathlib import Path
+from decouple import config
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-&of-*9d^c%jo61ul$$&9+d_e&s1o3u@$1qryd!uf36m2syn!6+'
-
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
-
+# SECRET_KEY = 'django-insecure-&of-*9d^c%jo61ul$$&9+d_e&s1o3u@$1qryd!uf36m2syn!6+'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-&of-*9d^c%jo61ul$&9+d_e&s1o3u@$1qryd!uf36m2syn!6+')
+# DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -30,6 +32,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -70,10 +73,10 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 #     }
 # }
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        conn_max_age=600
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -91,6 +94,8 @@ USE_TZ = True
 # Static files
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Media files
 MEDIA_URL = '/media/'
