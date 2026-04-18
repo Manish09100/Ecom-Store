@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.name }} - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="animate-fadeInLeft">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}?category={{ product.category.slug }}">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <div class="col-md-5 animate-fadeInLeft delay-1">
+            <div class="product-detail-img" {% if product.image %}id="zoom-container"{% endif %}>
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid w-100" id="zoom-img" alt="{{ product.name }}" style="border-radius:var(--radius-lg);">
+                {% else %}
+                <div class="d-flex align-items-center justify-content-center" style="height:400px;background:var(--bg-light);border-radius:var(--radius-lg);">
+                    <i class="bi bi-image text-muted" style="font-size:5rem;"></i>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-7 animate-fadeInRight delay-2">
+            <span class="badge mb-2" style="background:linear-gradient(135deg,#FFF5F0,#FFE8DB);color:var(--primary);font-size:0.8rem;">
+                {{ product.category.name }}
+            </span>
+            <h2 class="fw-bold" style="color:var(--secondary);">{{ product.name }}</h2>
+
+            <div class="price-tag my-3">
+                {% if product.discount_price %}
+                <span class="current-price">&#8377;{{ product.discount_price }}</span>
+                <span class="old-price ms-2">&#8377;{{ product.price }}</span>
+                <span class="badge ms-2" style="background:var(--accent);color:#fff;font-size:0.85rem;">{{ product.discount_percent }}% OFF</span>
+                {% else %}
+                <span class="current-price">&#8377;{{ product.price }}</span>
+                {% endif %}
+            </div>
+
+            {% if product.stock > 0 %}
+            <p style="color:var(--accent);font-weight:600;">
+                <i class="bi bi-check-circle-fill me-1"></i> In Stock <span class="text-muted fw-normal">({{ product.stock }} available)</span>
+            </p>
+            {% else %}
+            <p class="text-danger fw-bold"><i class="bi bi-x-circle-fill me-1"></i> Out of Stock</p>
+            {% endif %}
+
+            <p style="color:var(--text-muted);line-height:1.7;">{{ product.description }}</p>
+
+            {% if product.stock > 0 %}
+            <form method="POST" action="{% url 'cart_add' product.id %}" class="d-flex gap-3 align-items-center mt-4">
+                {% csrf_token %}
+                <div class="input-group" style="width:130px;">
+                    <span class="input-group-text" style="background:var(--bg-light);border-color:#E2E8F0;">Qty</span>
+                    <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-bag-plus me-2"></i> Add to Cart
+                </button>
+            </form>
+            {% endif %}
+
+            <!-- Trust badges -->
+            <div class="d-flex gap-4 mt-4 pt-3" style="border-top:1px solid #E2E8F0;">
+                <div class="text-center">
+                    <i class="bi bi-truck" style="font-size:1.3rem;color:var(--primary);"></i>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin:0;">Free Delivery</p>
+                </div>
+                <div class="text-center">
+                    <i class="bi bi-arrow-counterclockwise" style="font-size:1.3rem;color:var(--primary);"></i>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin:0;">7-Day Returns</p>
+                </div>
+                <div class="text-center">
+                    <i class="bi bi-shield-check" style="font-size:1.3rem;color:var(--primary);"></i>
+                    <p style="font-size:0.72rem;color:var(--text-muted);margin:0;">Secure Payment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+    <div class="mt-5 pt-4" style="border-top:1px solid #E2E8F0;">
+        <div class="section-header">
+            <h2>You May Also Like</h2>
+        </div>
+        <div class="row g-4">
+            {% for rp in related_products %}
+            <div class="col-6 col-md-3 animate-on-scroll">
+                <div class="product-card card h-100">
+                    <div class="img-wrapper">
+                        {% if rp.discount_percent %}
+                        <span class="discount-badge">-{{ rp.discount_percent }}%</span>
+                        {% endif %}
+                        {% if rp.image %}
+                        <img src="{{ rp.image.url }}" class="card-img-top" alt="{{ rp.name }}">
+                        {% else %}
+                        <div class="card-img-top d-flex align-items-center justify-content-center" style="background:var(--bg-light);">
+                            <i class="bi bi-image text-muted" style="font-size:3rem;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <span class="product-category">{{ rp.category.name }}</span>
+                        <h6 class="product-name">{{ rp.name }}</h6>
+                        <div class="product-price">&#8377;{{ rp.effective_price }}</div>
+                        <a href="{% url 'product_detail' rp.slug %}" class="btn btn-outline-primary btn-sm d-block mt-2">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const container = document.getElementById('zoom-container');
+    if (!container) return;
+    const img = document.getElementById('zoom-img');
+    const scale = 2;
+
+    container.addEventListener('mousemove', function(e) {
+        const rect = container.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        img.style.transformOrigin = x + '% ' + y + '%';
+        img.style.transform = 'scale(' + scale + ')';
+    });
+
+    container.addEventListener('mouseleave', function() {
+        img.style.transform = 'scale(1)';
+        img.style.transformOrigin = 'center center';
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order #{{ order.id }} - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <a href="{% url 'order_list' %}" class="btn btn-sm mb-3 animate-fadeInLeft" style="color:var(--primary);font-weight:600;">
+        <i class="bi bi-arrow-left me-1"></i> Back to Orders
+    </a>
+    <h3 class="fw-bold animate-fadeInLeft" style="color:var(--secondary);">Order #{{ order.id }}</h3>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-8">
+            <!-- Order Tracker -->
+            <div class="card shadow-sm mb-4 animate-fadeInUp delay-1">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-4" style="color:var(--secondary);">Order Status</h6>
+                    <div class="order-tracker">
+                        <div class="step {% if order.status == 'pending' %}active{% elif order.status != 'cancelled' %}completed{% endif %}">
+                            <div class="circle"><i class="bi bi-clock"></i></div>
+                            <span>Pending</span>
+                        </div>
+                        <div class="step {% if order.status == 'confirmed' %}active{% elif order.status == 'shipped' or order.status == 'delivered' %}completed{% endif %}">
+                            <div class="circle"><i class="bi bi-check"></i></div>
+                            <span>Confirmed</span>
+                        </div>
+                        <div class="step {% if order.status == 'shipped' %}active{% elif order.status == 'delivered' %}completed{% endif %}">
+                            <div class="circle"><i class="bi bi-truck"></i></div>
+                            <span>Shipped</span>
+                        </div>
+                        <div class="step {% if order.status == 'delivered' %}active{% endif %}">
+                            <div class="circle"><i class="bi bi-house-check"></i></div>
+                            <span>Delivered</span>
+                        </div>
+                    </div>
+                    {% if order.status == 'cancelled' %}
+                    <div class="alert mt-3 mb-0" style="background:#FDE8EF;color:#E91E63;border:none;border-radius:10px;">
+                        <i class="bi bi-x-circle me-1"></i> This order has been cancelled
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div class="card shadow-sm animate-fadeInUp delay-2">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color:var(--secondary);">Order Items</h6>
+                    <table class="table align-middle">
+                        <thead style="background:var(--bg-light);">
+                            <tr>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.85rem;">Product</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.85rem;">Price</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.85rem;">Qty</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.85rem;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td class="fw-600" style="font-weight:600;">{{ item.product.name }}</td>
+                                <td>&#8377;{{ item.price }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td style="font-weight:700;color:var(--primary);">&#8377;{{ item.total_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="fw-bold fs-5" style="color:var(--secondary);">Total</td>
+                                <td class="fw-bold fs-5" style="color:var(--primary);">&#8377;{{ order.total_amount }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 animate-fadeInRight delay-2">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-3" style="color:var(--secondary);">
+                        <i class="bi bi-geo-alt me-2" style="color:var(--primary);"></i>Shipping Address
+                    </h6>
+                    <div style="color:var(--text-muted);font-size:0.9rem;line-height:1.8;">
+                        <p class="mb-1 fw-bold" style="color:var(--text-dark);">{{ order.full_name }}</p>
+                        <p class="mb-1">{{ order.address }}</p>
+                        <p class="mb-1">{{ order.city }}, {{ order.state }} - {{ order.pincode }}</p>
+                        <hr style="border-color:#E2E8F0;">
+                        <p class="mb-1"><i class="bi bi-telephone me-2" style="color:var(--primary);"></i>{{ order.phone }}</p>
+                        <p class="mb-1"><i class="bi bi-envelope me-2" style="color:var(--primary);"></i>{{ order.email }}</p>
+                        <hr style="border-color:#E2E8F0;">
+                        <p class="mb-1"><i class="bi bi-calendar me-2" style="color:var(--primary);"></i>{{ order.created_at|date:"d M Y, h:i A" }}</p>
+                        {% if order.razorpay_payment_id %}
+                        <p class="mb-0"><i class="bi bi-credit-card me-2" style="color:var(--primary);"></i>{{ order.razorpay_payment_id }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

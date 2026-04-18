@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Order Confirmed - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center animate-scaleIn">
+            <div class="card shadow-sm" style="border-radius:var(--radius-lg);">
+                <div class="card-body p-5">
+                    <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#E8F5E9,#C8E6C9);display:flex;align-items:center;justify-content:center;margin:0 auto;animation:pulse 2s infinite;">
+                        <i class="bi bi-check-lg" style="font-size:2.5rem;color:#43A047;"></i>
+                    </div>
+                    <h2 class="mt-4 fw-bold" style="color:var(--secondary);">Order Confirmed!</h2>
+                    <p style="color:var(--text-muted);">Your order #{{ order.id }} has been placed successfully</p>
+                    <div class="price-tag my-3">
+                        <span class="current-price">&#8377;{{ order.total_amount }}</span>
+                    </div>
+                    <hr style="border-color:#E2E8F0;">
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a href="{% url 'order_detail' order.id %}" class="btn btn-primary px-4">
+                            <i class="bi bi-eye me-1"></i> View Order
+                        </a>
+                        <a href="{% url 'product_list' %}" class="btn btn-outline-primary px-4">
+                            Continue Shopping
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

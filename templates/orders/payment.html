@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Payment - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 animate-scaleIn">
+            <div class="card shadow-sm text-center" style="border-radius:var(--radius-lg);overflow:hidden;">
+                <div class="py-4" style="background:var(--gradient-hero);">
+                    <i class="bi bi-shield-lock-fill" style="font-size:3.5rem;color:var(--primary);"></i>
+                    <h3 class="text-white mt-2 fw-bold">Secure Payment</h3>
+                </div>
+                <div class="card-body p-5">
+                    <p style="color:var(--text-muted);">Order #{{ order.id }}</p>
+                    <div class="price-tag my-3">
+                        <span class="current-price">&#8377;{{ order.total_amount }}</span>
+                    </div>
+                    <button id="pay-btn" class="btn btn-primary btn-lg px-5 mt-3 fw-bold w-100 py-3">
+                        <i class="bi bi-credit-card me-2"></i>Pay Now
+                    </button>
+                    <p class="mt-3 mb-0" style="font-size:0.75rem;color:var(--text-muted);">
+                        <i class="bi bi-lock me-1"></i> Powered by Razorpay - 100% Secure
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key_id }}",
+        "amount": "{{ amount }}",
+        "currency": "{{ currency }}",
+        "name": "ShopEasy",
+        "description": "Order #{{ order.id }}",
+        "order_id": "{{ razorpay_order_id }}",
+        "handler": function (response) {
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{% url "payment_callback" %}';
+            var fields = {
+                'razorpay_payment_id': response.razorpay_payment_id,
+                'razorpay_order_id': response.razorpay_order_id,
+                'razorpay_signature': response.razorpay_signature,
+            };
+            for (var key in fields) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+        },
+        "prefill": {
+            "name": "{{ order.full_name }}",
+            "email": "{{ order.email }}",
+            "contact": "{{ order.phone }}"
+        },
+        "theme": { "color": "#FF6B35" }
+    };
+    var rzp = new Razorpay(options);
+    document.getElementById('pay-btn').onclick = function(e) {
+        rzp.open();
+        e.preventDefault();
+    };
+</script>
+{% endblock %}

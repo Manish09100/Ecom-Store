@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Sign Up - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 animate-scaleIn">
+            <div class="card shadow-sm" style="border-radius:var(--radius-lg);overflow:hidden;">
+                <div class="text-center py-4" style="background:var(--gradient-hero);">
+                    <i class="bi bi-person-plus-fill" style="font-size:3rem;color:var(--primary);"></i>
+                    <h4 class="text-white mt-2 fw-bold">Create Account</h4>
+                    <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">Join ShopEasy today</p>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight:600;font-size:0.9rem;">{{ field.label }}</label>
+                            <input type="{{ field.field.widget.input_type|default:'text' }}"
+                                   name="{{ field.html_name }}"
+                                   class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                   value="{{ field.value|default:'' }}"
+                                   placeholder="Enter {{ field.label|lower }}"
+                                   {% if field.field.required %}required{% endif %}>
+                            {% for error in field.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                            {% if field.help_text %}
+                            <small class="form-text" style="color:var(--text-muted);font-size:0.75rem;">{{ field.help_text }}</small>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+                            <i class="bi bi-person-check me-2"></i>Create Account
+                        </button>
+                    </form>
+                    <p class="text-center mt-4 mb-0" style="font-size:0.9rem;">
+                        Already have an account? <a href="{% url 'login' %}" style="color:var(--primary);font-weight:600;">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

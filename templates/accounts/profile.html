@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 animate-fadeInUp">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:60px;height:60px;background:var(--gradient-primary);color:#fff;font-size:1.5rem;font-weight:700;">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0" style="color:var(--secondary);">My Profile</h3>
+                    <p class="mb-0" style="color:var(--text-muted);font-size:0.9rem;">Manage your account details</p>
+                </div>
+            </div>
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            {% for field in form %}
+                            <div class="{% if field.name == 'address' %}col-12{% else %}col-md-6{% endif %}">
+                                <label class="form-label" style="font-weight:600;font-size:0.9rem;">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-4 px-4">
+                            <i class="bi bi-check-lg me-1"></i> Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

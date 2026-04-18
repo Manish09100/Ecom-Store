@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard - ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-2 animate-fadeInLeft">
+            <div class="card shadow-sm" style="border-radius:var(--radius-lg);">
+                <div class="card-body p-2">
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'dashboard_home' %}" class="list-group-item list-group-item-action active" style="border-radius:10px;border:none;font-weight:600;">
+                            <i class="bi bi-speedometer2 me-2"></i>Overview
+                        </a>
+                        <a href="{% url 'dashboard_orders' %}" class="list-group-item list-group-item-action" style="border-radius:10px;border:none;">
+                            <i class="bi bi-box-seam me-2"></i>Orders
+                        </a>
+                        <a href="{% url 'dashboard_products' %}" class="list-group-item list-group-item-action" style="border-radius:10px;border:none;">
+                            <i class="bi bi-grid me-2"></i>Products
+                        </a>
+                        <a href="{% url 'admin:index' %}" class="list-group-item list-group-item-action" style="border-radius:10px;border:none;">
+                            <i class="bi bi-gear me-2"></i>Django Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-10">
+            <h3 class="fw-bold mb-4 animate-fadeInUp" style="color:var(--secondary);">
+                <i class="bi bi-speedometer2 me-2" style="color:var(--primary);"></i>Dashboard
+            </h3>
+
+            <!-- === Row 1: Today's Quick Stats === -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-4 animate-fadeInUp delay-1">
+                    <div class="quick-stat-card" style="background:linear-gradient(135deg,#667EEA,#764BA2);">
+                        <div class="qs-icon"><i class="bi bi-bag-check-fill"></i></div>
+                        <div>
+                            <div class="qs-value">{{ today_orders }}</div>
+                            <div class="qs-label">Today's Orders</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-fadeInUp delay-2">
+                    <div class="quick-stat-card" style="background:linear-gradient(135deg,#F093FB,#F5576C);">
+                        <div class="qs-icon"><i class="bi bi-currency-rupee"></i></div>
+                        <div>
+                            <div class="qs-value">&#8377;{{ today_revenue|floatformat:0 }}</div>
+                            <div class="qs-label">Today's Revenue</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 animate-fadeInUp delay-3">
+                    <div class="quick-stat-card" style="background:linear-gradient(135deg,#4FACFE,#00F2FE);">
+                        <div class="qs-icon"><i class="bi bi-person-plus-fill"></i></div>
+                        <div>
+                            <div class="qs-value">{{ new_customers_today }}</div>
+                            <div class="qs-label">New Customers Today</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Row 2: KPI Cards with Change Indicators === -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3 animate-fadeInUp delay-1">
+                    <div class="stat-card card" style="background:linear-gradient(135deg,#FF6B35,#FF8C5A);color:#fff;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-1" style="opacity:0.8;font-size:0.8rem;font-weight:500;">TOTAL REVENUE</p>
+                                    <h3 class="fw-bold mb-0">&#8377;{{ total_revenue|floatformat:0 }}</h3>
+                                    <span class="kpi-change {% if revenue_change_up %}up{% else %}down{% endif %}">
+                                        <i class="bi bi-arrow-{% if revenue_change_up %}up{% else %}down{% endif %}"></i>
+                                        {{ revenue_change }}%
+                                    </span>
+                                </div>
+                                <div class="stat-icon" style="background:rgba(255,255,255,0.2);color:#fff;">
+                                    <i class="bi bi-currency-rupee"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 animate-fadeInUp delay-2">
+                    <div class="stat-card card" style="background:linear-gradient(135deg,#00C9A7,#00E5BE);color:#fff;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-1" style="opacity:0.8;font-size:0.8rem;font-weight:500;">TOTAL ORDERS</p>
+                                    <h3 class="fw-bold mb-0">{{ total_orders }}</h3>
+                                    <span class="kpi-change {% if orders_change_up %}up{% else %}down{% endif %}">
+                                        <i class="bi bi-arrow-{% if orders_change_up %}up{% else %}down{% endif %}"></i>
+                                        {{ orders_change }}%
+                                    </span>
+                                </div>
+                                <div class="stat-icon" style="background:rgba(255,255,255,0.2);color:#fff;">
+                                    <i class="bi bi-bag-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 animate-fadeInUp delay-3">
+                    <div class="stat-card card" style="background:linear-gradient(135deg,#4285F4,#6EA8FE);color:#fff;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-1" style="opacity:0.8;font-size:0.8rem;font-weight:500;">TOTAL USERS</p>
+                                    <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+                                    <span class="kpi-change {% if users_change_up %}up{% else %}down{% endif %}">
+                                        <i class="bi bi-arrow-{% if users_change_up %}up{% else %}down{% endif %}"></i>
+                                        {{ users_change }}%
+                                    </span>
+                                </div>
+                                <div class="stat-icon" style="background:rgba(255,255,255,0.2);color:#fff;">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 animate-fadeInUp delay-4">
+                    <div class="stat-card card" style="background:linear-gradient(135deg,#FFB020,#FFD060);color:#fff;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="mb-1" style="opacity:0.8;font-size:0.8rem;font-weight:500;">PENDING ORDERS</p>
+                                    <h3 class="fw-bold mb-0">{{ pending_orders }}</h3>
+                                </div>
+                                <div class="stat-icon" style="background:rgba(255,255,255,0.2);color:#fff;">
+                                    <i class="bi bi-clock"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Row 3: Revenue Chart + Order Status Donut === -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-8 animate-fadeInUp delay-5">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-bar-chart-fill" style="color:var(--primary);"></i> Monthly Revenue
+                        </div>
+                        <div class="card-body">
+                            {% if monthly_chart %}
+                            <div class="chart-container">
+                                {% for m in monthly_chart %}
+                                <div class="chart-bar-wrapper">
+                                    <div class="chart-bar-value">&#8377;{{ m.total_display }}</div>
+                                    <div class="chart-bar" style="height:{{ m.height_pct }}%;"></div>
+                                    <div class="chart-bar-label">{{ m.month }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5" style="color:var(--text-muted);">
+                                <i class="bi bi-bar-chart" style="font-size:2.5rem;opacity:0.3;"></i>
+                                <p class="mt-2">No revenue data yet</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 animate-fadeInUp delay-6">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-pie-chart-fill" style="color:var(--accent);"></i> Order Status
+                        </div>
+                        <div class="card-body">
+                            {% if total_orders > 0 %}
+                            <div class="donut-chart-container">
+                                <div class="donut-chart" style="background:conic-gradient({{ conic_gradient_css }});">
+                                    <div class="donut-hole">
+                                        <div class="donut-total">{{ total_orders }}</div>
+                                        <div class="donut-label">Total</div>
+                                    </div>
+                                </div>
+                                <div class="donut-legend">
+                                    {% for s in status_data %}
+                                    <div class="donut-legend-item">
+                                        <div class="donut-legend-dot" style="background:{{ s.color }};"></div>
+                                        <span class="donut-legend-label">{{ s.status }}</span>
+                                        <span class="donut-legend-count">{{ s.count }} ({{ s.pct }}%)</span>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5" style="color:var(--text-muted);">
+                                <i class="bi bi-pie-chart" style="font-size:2.5rem;opacity:0.3;"></i>
+                                <p class="mt-2">No orders yet</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Row 4: Top Products + Recent Customers === -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-7 animate-fadeInUp delay-5">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-trophy-fill" style="color:var(--gold);"></i> Top Selling Products
+                        </div>
+                        <div class="card-body">
+                            {% if top_products %}
+                            {% for p in top_products %}
+                            <div class="top-product-row">
+                                <div class="top-product-rank {% if forloop.counter == 1 %}rank-1{% elif forloop.counter == 2 %}rank-2{% elif forloop.counter == 3 %}rank-3{% else %}rank-default{% endif %}">
+                                    {{ forloop.counter }}
+                                </div>
+                                <div class="top-product-info">
+                                    <div class="top-product-name">{{ p.product__name }}</div>
+                                    <div class="top-product-bar-bg">
+                                        <div class="top-product-bar-fill" style="width:{{ p.bar_pct }}%;"></div>
+                                    </div>
+                                </div>
+                                <div class="top-product-qty">{{ p.total_qty }} sold</div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4" style="color:var(--text-muted);">No sales data yet</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 animate-fadeInUp delay-6">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-people-fill" style="color:#4285F4;"></i> Recent Customers
+                        </div>
+                        <div class="card-body">
+                            {% if recent_customers %}
+                            {% for c in recent_customers %}
+                            <div class="customer-row">
+                                <div class="customer-avatar" style="background:{{ c.color }};">{{ c.initial }}</div>
+                                <div class="customer-info">
+                                    <div class="customer-name">{{ c.user.get_full_name|default:c.user.username }}</div>
+                                    <div class="customer-joined">Joined {{ c.user.date_joined|timesince }} ago</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4" style="color:var(--text-muted);">No customers yet</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Row 5: Payment Breakdown + Low Stock Alerts === -->
+            <div class="row g-3 mb-4">
+                <div class="col-lg-5 animate-fadeInUp delay-5">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-wallet2" style="color:var(--primary);"></i> Payment Methods
+                        </div>
+                        <div class="card-body">
+                            {% if razorpay_count or cod_count %}
+                            <div class="payment-bar">
+                                {% if razorpay_pct > 0 %}
+                                <div class="payment-segment razorpay" style="width:{{ razorpay_pct }}%;">
+                                    {% if razorpay_pct > 15 %}{{ razorpay_pct }}%{% endif %}
+                                </div>
+                                {% endif %}
+                                {% if cod_pct > 0 %}
+                                <div class="payment-segment cod" style="width:{{ cod_pct }}%;">
+                                    {% if cod_pct > 15 %}{{ cod_pct }}%{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="payment-legend">
+                                <div class="payment-legend-item">
+                                    <div class="payment-legend-dot" style="background:#4285F4;"></div>
+                                    <span style="color:var(--text-muted);">Razorpay ({{ razorpay_count }})</span>
+                                </div>
+                                <div class="payment-legend-item">
+                                    <div class="payment-legend-dot" style="background:#FFB020;"></div>
+                                    <span style="color:var(--text-muted);">COD ({{ cod_count }})</span>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4" style="color:var(--text-muted);">No payment data yet</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7 animate-fadeInUp delay-6">
+                    <div class="card dash-card">
+                        <div class="card-header">
+                            <i class="bi bi-exclamation-triangle-fill" style="color:#EF4444;"></i> Low Stock Alerts
+                        </div>
+                        <div class="card-body">
+                            {% if low_stock_products %}
+                            {% for product in low_stock_products %}
+                            <div class="low-stock-row">
+                                <span class="low-stock-name">{{ product.name }}</span>
+                                <span class="low-stock-badge {% if product.stock <= 2 %}critical{% elif product.stock <= 5 %}warning{% else %}caution{% endif %}">
+                                    {{ product.stock }} left
+                                </span>
+                            </div>
+                            {% endfor %}
+                            {% else %}
+                            <div class="text-center py-4" style="color:var(--accent);">
+                                <i class="bi bi-check-circle me-1"></i> All products are well stocked!
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- === Row 6: Recent Orders Table === -->
+            <div class="card dash-card animate-fadeInUp delay-7">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div><i class="bi bi-receipt me-2" style="color:var(--primary);"></i>Recent Orders</div>
+                    <a href="{% url 'dashboard_orders' %}" class="btn btn-sm btn-outline-primary">View All <i class="bi bi-arrow-right ms-1"></i></a>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead style="background:var(--bg-light);">
+                            <tr>
+                                <th class="ps-4" style="font-weight:600;color:var(--text-muted);font-size:0.8rem;">ORDER</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.8rem;">CUSTOMER</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.8rem;">AMOUNT</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.8rem;">STATUS</th>
+                                <th style="font-weight:600;color:var(--text-muted);font-size:0.8rem;">DATE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_orders %}
+                            <tr>
+                                <td class="ps-4 fw-bold">#{{ order.id }}</td>
+                                <td>{{ order.full_name }}</td>
+                                <td style="font-weight:700;color:var(--primary);">&#8377;{{ order.total_amount }}</td>
+                                <td>
+                                    {% if order.status == 'delivered' %}
+                                    <span class="badge px-3 py-1" style="background:var(--accent);">Delivered</span>
+                                    {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-info px-3 py-1">Shipped</span>
+                                    {% elif order.status == 'confirmed' %}
+                                    <span class="badge px-3 py-1" style="background:var(--secondary);">Confirmed</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger px-3 py-1">Cancelled</span>
+                                    {% else %}
+                                    <span class="badge px-3 py-1" style="background:#FFB020;">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color:var(--text-muted);font-size:0.85rem;">{{ order.created_at|date:"d M Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="5" class="text-center py-4" style="color:var(--text-muted);">No orders yet</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
